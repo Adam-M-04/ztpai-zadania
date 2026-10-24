@@ -8,7 +8,7 @@ const ALLOWED_TRANSITIONS = {
   CANCELLED: [],
 };
 
-function createReservationsService({ reservationsRepository, roomsRepository, now = () => new Date() }) {
+function createReservationsService({ reservationsRepository, runInTransaction, now = () => new Date() }) {
   async function listReservations(filters) {
     const { data, total } = await reservationsRepository.findAll(filters);
 
@@ -34,54 +34,56 @@ function createReservationsService({ reservationsRepository, roomsRepository, no
   }
 
   async function createReservation(input) {
-    const room = await roomsRepository.findById(input.roomId);
+    return runInTransaction(async ({ roomsRepository, reservationsRepository }) => {
+      const room = await roomsRepository.findByIdForUpdate(input.roomId);
 
-    if (!room) {
-      throw new NotFoundError("Room");
-    }
+      if (!room) {
+        throw new NotFoundError("Room");
+      }
 
-    const start = new Date(input.startTime).getTime();
-    const end = new Date(input.endTime).getTime();
+      const start = new Date(input.startTime).getTime();
+      const end = new Date(input.endTime).getTime();
 
-    if (end <= start) {
-      throw new ValidationError([
-        { location: "body", field: "endTime", message: "endTime must be later than startTime" },
-      ]);
-    }
+      if (end <= start) {
+        throw new ValidationError([
+          { location: "body", field: "endTime", message: "endTime must be later than startTime" },
+        ]);
+      }
 
-    if (end - start < MIN_DURATION || end - start > MAX_DURATION) {
-      throw new ValidationError([
-        { location: "body", field: "endTime", message: "Reservation must last from 15 minutes to 8 hours" },
-      ]);
-    }
+      if (end - start < MIN_DURATION || end - start > MAX_DURATION) {
+        throw new ValidationError([
+          { location: "body", field: "endTime", message: "Reservation must last from 15 minutes to 8 hours" },
+        ]);
+      }
 
-    if (start < now().getTime()) {
-      throw new ValidationError([
-        { location: "body", field: "startTime", message: "startTime cannot be in the past" },
-      ]);
-    }
+      if (start < now().getTime()) {
+        throw new ValidationError([
+          { location: "body", field: "startTime", message: "startTime cannot be in the past" },
+        ]);
+      }
 
-    if (input.participants > room.capacity) {
-      throw new ConflictError("Room capacity exceeded", "ROOM_CAPACITY_EXCEEDED");
-    }
+      if (input.participants > room.capacity) {
+        throw new ConflictError("Room capacity exceeded", "ROOM_CAPACITY_EXCEEDED");
+      }
 
-    const active = await reservationsRepository.findByRoomAndStatus(room.id, "CONFIRMED");
-    const overlapping = active.find((r) => start < r.endTime.getTime() && r.startTime.getTime() < end);
+      const active = await reservationsRepository.findByRoomAndStatus(room.id, "CONFIRMED");
+      const overlapping = active.find((r) => start < r.endTime.getTime() && r.startTime.getTime() < end);
 
-    if (overlapping) {
-      throw new ConflictError("Room is already booked in this time", "ROOM_ALREADY_BOOKED");
-    }
+      if (overlapping) {
+        throw new ConflictError("Room is already booked in this time", "ROOM_ALREADY_BOOKED");
+      }
 
-    return reservationsRepository.create({
-      roomId: room.id,
-      reservedBy: input.reservedBy,
-      participants: input.participants,
-      startTime: new Date(start),
-      endTime: new Date(end),
-      status: "CONFIRMED",
-      createdAt: now(),
-      cancelledAt: null,
-      internalNote: "created via API v2",
+      return reservationsRepository.create({
+        roomId: room.id,
+        reservedBy: input.reservedBy,
+        participants: input.participants,
+        startTime: new Date(start),
+        endTime: new Date(end),
+        status: "CONFIRMED",
+        createdAt: now(),
+        cancelledAt: null,
+        internalNote: "created via API v2",
+      });
     });
   }
 

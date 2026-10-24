@@ -16,6 +16,11 @@ function createRoomsRepository(data) {
       return room ? withBuilding(room) : null;
     },
 
+    async findByIdForUpdate(id) {
+      const room = data.rooms.find((r) => r.id === id);
+      return room ? withBuilding(room) : null;
+    },
+
     async findByBuildingId(buildingId) {
       return data.rooms.filter((r) => r.buildingId === buildingId).map(withBuilding);
     },

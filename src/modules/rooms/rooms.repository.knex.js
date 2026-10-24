@@ -29,6 +29,11 @@ function createRoomsRepository(db) {
 
     findById,
 
+    async findByIdForUpdate(id) {
+      const row = await selectRooms(db).where("r.id", id).forUpdate("r").first();
+      return row ? toRoom(row) : null;
+    },
+
     async findByBuildingId(buildingId) {
       const rows = await selectRooms(db).where("r.building_id", buildingId).orderBy("r.id");
       return rows.map(toRoom);

@@ -6,10 +6,20 @@ const { createReservationsRepository } = require("./modules/reservations/reserva
 
 const PORT = 3000;
 
+function runInTransaction(work) {
+  return db.transaction((trx) =>
+    work({
+      roomsRepository: createRoomsRepository(trx),
+      reservationsRepository: createReservationsRepository(trx),
+    })
+  );
+}
+
 const app = createApp({
   buildingsRepository: createBuildingsRepository(db),
   roomsRepository: createRoomsRepository(db),
   reservationsRepository: createReservationsRepository(db),
+  runInTransaction,
 });
 
 app.listen(PORT, () => {

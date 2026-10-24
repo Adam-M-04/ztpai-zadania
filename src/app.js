@@ -12,15 +12,19 @@ const { createReservationsService } = require("./modules/reservations/reservatio
 const { createReservationsController } = require("./modules/reservations/reservations.controller");
 const { createReservationsRouter } = require("./modules/reservations/reservations.routes");
 
-function createApp({ buildingsRepository, roomsRepository, reservationsRepository, now }) {
+function createApp({ buildingsRepository, roomsRepository, reservationsRepository, runInTransaction, now }) {
   const app = express();
+
+  if (!runInTransaction) {
+    runInTransaction = (work) => work({ roomsRepository, reservationsRepository });
+  }
 
   app.use(requestLogger);
   app.use(express.json());
 
   const buildingsService = createBuildingsService({ buildingsRepository, roomsRepository });
   const roomsService = createRoomsService({ roomsRepository, buildingsRepository });
-  const reservationsService = createReservationsService({ reservationsRepository, roomsRepository, now });
+  const reservationsService = createReservationsService({ reservationsRepository, runInTransaction, now });
 
   app.use("/api/buildings", createBuildingsRouter(createBuildingsController(buildingsService)));
   app.use("/api/rooms", createRoomsRouter(createRoomsController(roomsService)));

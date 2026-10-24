@@ -32,6 +32,16 @@ function errorHandler(err, req, res, next) {
     });
   }
 
+  if (err.code === "23P01") {
+    return res.status(409).json({
+      error: {
+        code: "ROOM_ALREADY_BOOKED",
+        message: "Room is already booked in this time",
+        requestId: req.id,
+      },
+    });
+  }
+
   console.error(`[${req.id}]`, err);
 
   res.status(500).json({
