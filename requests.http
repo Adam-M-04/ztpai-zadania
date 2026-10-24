@@ -1,0 +1,285 @@
+@host = http://localhost:3000
+
+GET {{host}}/api/rooms
+
+###
+
+GET {{host}}/api/rooms/1
+
+###
+
+GET {{host}}/api/rooms/99
+
+###
+
+GET {{host}}/api/rooms/abc
+
+###
+
+GET {{host}}/api/reservations
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 1,
+  "reservedBy": "Jan Kowalski",
+  "participants": 20,
+  "startTime": "2026-11-10T10:00:00Z",
+  "endTime": "2026-11-10T12:00:00Z"
+}
+
+###
+
+GET {{host}}/api/reservations/2
+
+###
+
+GET {{host}}/api/reservations?roomId=1
+
+###
+
+GET {{host}}/api/reservations?roomId=abc
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 1,
+  "reservedBy": "Jan Kowalski",
+  "participants": 10,
+  "startTime": "2026-11-10T12:00:00Z",
+  "endTime": "2026-11-10T13:00:00Z"
+}
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 1,
+  "reservedBy": "Jan Kowalski",
+  "participants": 10,
+  "startTime": "2026-11-10T08:00:00Z",
+  "endTime": "2026-11-10T10:00:00Z"
+}
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 1,
+  "reservedBy": "Jan Kowalski",
+  "participants": 10,
+  "startTime": "2026-11-10T11:00:00Z",
+  "endTime": "2026-11-10T13:00:00Z"
+}
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 1,
+  "reservedBy": "Jan Kowalski",
+  "participants": 10,
+  "startTime": "2026-11-10T09:00:00Z",
+  "endTime": "2026-11-10T13:00:00Z"
+}
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 1,
+  "reservedBy": "Jan Kowalski",
+  "participants": 10,
+  "startTime": "2026-11-10T10:30:00Z",
+  "endTime": "2026-11-10T11:00:00Z"
+}
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 1,
+  "reservedBy": "Jan Kowalski",
+  "participants": 10,
+  "startTime": "2026-11-10T11:30:00+01:00",
+  "endTime": "2026-11-10T12:00:00+01:00"
+}
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 2,
+  "reservedBy": "Jan Kowalski",
+  "participants": 10,
+  "startTime": "2026-11-10T10:00:00Z",
+  "endTime": "2026-11-10T12:00:00Z"
+}
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 3,
+  "reservedBy": "Anna Nowak",
+  "participants": 10,
+  "startTime": "2026-11-10T10:00:00Z",
+  "endTime": "2026-11-10T12:00:00Z"
+}
+
+###
+
+PATCH {{host}}/api/reservations/6/cancel
+
+###
+
+PATCH {{host}}/api/reservations/6/cancel
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 3,
+  "reservedBy": "Tomasz Zieliński",
+  "participants": 10,
+  "startTime": "2026-11-10T10:00:00Z",
+  "endTime": "2026-11-10T12:00:00Z"
+}
+
+###
+
+PATCH {{host}}/api/reservations/1/cancel
+
+###
+
+PATCH {{host}}/api/reservations/99/cancel
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 4,
+  "reservedBy": "Jan Kowalski",
+  "participants": 40,
+  "startTime": "2026-11-10T10:00:00Z",
+  "endTime": "2026-11-10T12:00:00Z"
+}
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 4,
+  "reservedBy": "Jan Kowalski",
+  "participants": 10,
+  "startTime": "2026-11-10T12:00:00Z",
+  "endTime": "2026-11-10T10:00:00Z"
+}
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 4,
+  "reservedBy": "Jan Kowalski",
+  "participants": 10,
+  "startTime": "2026-11-10T10:00:00Z",
+  "endTime": "2026-11-10T10:10:00Z"
+}
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 4,
+  "reservedBy": "Jan Kowalski",
+  "participants": 10,
+  "startTime": "2026-11-10T08:00:00Z",
+  "endTime": "2026-11-10T17:00:00Z"
+}
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 4,
+  "reservedBy": "Jan Kowalski",
+  "participants": 10,
+  "startTime": "2026-10-01T10:00:00Z",
+  "endTime": "2026-10-01T11:00:00Z"
+}
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 99,
+  "reservedBy": "Jan Kowalski",
+  "participants": 10,
+  "startTime": "2026-11-10T10:00:00Z",
+  "endTime": "2026-11-10T12:00:00Z"
+}
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 1,
+  "reservedBy": "Al",
+  "participants": -5,
+  "startTime": "2026-11-10T10:00:00Z",
+  "endTime": "jutro",
+  "status": "CANCELLED"
+}
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 1,
+
+###
+
+GET {{host}}/api/nope
+
+###
+
+GET {{host}}/api/debug/crash
