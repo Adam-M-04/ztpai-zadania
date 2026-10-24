@@ -1,33 +1,35 @@
-function createRoomsRepository() {
-  const rooms = [
-    { id: 1, buildingId: 1, name: "101", capacity: 30, createdAt: new Date("2026-09-02T08:00:00.000Z") },
-    { id: 2, buildingId: 1, name: "102", capacity: 20, createdAt: new Date("2026-09-02T08:00:00.000Z") },
-    { id: 3, buildingId: 1, name: "201", capacity: 50, createdAt: new Date("2026-09-02T08:00:00.000Z") },
-    { id: 4, buildingId: 2, name: "101", capacity: 12, createdAt: new Date("2026-09-02T08:00:00.000Z") },
-    { id: 5, buildingId: 2, name: "202", capacity: 40, createdAt: new Date("2026-09-02T08:00:00.000Z") },
-  ];
+function createRoomsRepository(data) {
+  let nextId = Math.max(0, ...data.rooms.map((r) => r.id)) + 1;
 
-  let nextId = Math.max(0, ...rooms.map((r) => r.id)) + 1;
+  function withBuilding(room) {
+    const building = data.buildings.find((b) => b.id === room.buildingId);
+    return { ...room, building: { id: building.id, name: building.name } };
+  }
 
   return {
     async findAll() {
-      return rooms;
+      return data.rooms.map(withBuilding);
     },
 
     async findById(id) {
-      return rooms.find((r) => r.id === id) ?? null;
+      const room = data.rooms.find((r) => r.id === id);
+      return room ? withBuilding(room) : null;
     },
 
-    async create(data) {
+    async findByBuildingId(buildingId) {
+      return data.rooms.filter((r) => r.buildingId === buildingId).map(withBuilding);
+    },
+
+    async create(input) {
       const room = {
         id: nextId++,
-        buildingId: data.buildingId,
-        name: data.name,
-        capacity: data.capacity,
+        buildingId: input.buildingId,
+        name: input.name,
+        capacity: input.capacity,
         createdAt: new Date(),
       };
-      rooms.push(room);
-      return room;
+      data.rooms.push(room);
+      return withBuilding(room);
     },
   };
 }

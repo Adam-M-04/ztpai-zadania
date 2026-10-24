@@ -18,7 +18,7 @@ function createApp({ buildingsRepository, roomsRepository, reservationsRepositor
   app.use(requestLogger);
   app.use(express.json());
 
-  const buildingsService = createBuildingsService({ buildingsRepository });
+  const buildingsService = createBuildingsService({ buildingsRepository, roomsRepository });
   const roomsService = createRoomsService({ roomsRepository, buildingsRepository });
   const reservationsService = createReservationsService({ reservationsRepository, roomsRepository, now });
 

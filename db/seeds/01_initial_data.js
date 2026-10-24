@@ -4,6 +4,7 @@ exports.seed = async function (knex) {
   await knex("buildings").insert([
     { name: "Budynek A", address: "ul. Warszawska 24, Kraków", created_at: "2026-09-01T08:00:00Z" },
     { name: "Budynek B", address: "ul. Podchorążych 2, Kraków", created_at: "2026-09-01T08:00:00Z" },
+    { name: "Budynek C", address: "ul. Długa 5, Kraków", created_at: "2026-09-01T08:00:00Z" },
   ]);
 
   await knex("rooms").insert([

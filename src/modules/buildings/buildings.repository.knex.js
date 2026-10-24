@@ -4,18 +4,27 @@ function toBuilding(row) {
     name: row.name,
     address: row.address,
     createdAt: row.created_at,
+    roomsCount: Number(row.rooms_count ?? 0),
   };
+}
+
+function selectBuildings(db) {
+  return db("buildings as b")
+    .leftJoin("rooms as r", "r.building_id", "b.id")
+    .select("b.*")
+    .count("r.id as rooms_count")
+    .groupBy("b.id");
 }
 
 function createBuildingsRepository(db) {
   return {
     async findAll() {
-      const rows = await db("buildings").orderBy("id");
+      const rows = await selectBuildings(db).orderBy("b.id");
       return rows.map(toBuilding);
     },
 
     async findById(id) {
-      const row = await db("buildings").where({ id }).first();
+      const row = await selectBuildings(db).where("b.id", id).first();
       return row ? toBuilding(row) : null;
     },
 

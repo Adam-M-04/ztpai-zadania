@@ -1,24 +1,24 @@
-function createBuildingsRepository() {
-  const buildings = [
-    { id: 1, name: "Budynek A", address: "ul. Warszawska 24, Kraków", createdAt: new Date("2026-09-01T08:00:00.000Z") },
-    { id: 2, name: "Budynek B", address: "ul. Podchorążych 2, Kraków", createdAt: new Date("2026-09-01T08:00:00.000Z") },
-  ];
+function createBuildingsRepository(data) {
+  let nextId = Math.max(0, ...data.buildings.map((b) => b.id)) + 1;
 
-  let nextId = Math.max(0, ...buildings.map((b) => b.id)) + 1;
+  function withRoomsCount(building) {
+    return { ...building, roomsCount: data.rooms.filter((r) => r.buildingId === building.id).length };
+  }
 
   return {
     async findAll() {
-      return buildings;
+      return data.buildings.map(withRoomsCount);
     },
 
     async findById(id) {
-      return buildings.find((b) => b.id === id) ?? null;
+      const building = data.buildings.find((b) => b.id === id);
+      return building ? withRoomsCount(building) : null;
     },
 
-    async create(data) {
-      const building = { id: nextId++, name: data.name, address: data.address, createdAt: new Date() };
-      buildings.push(building);
-      return building;
+    async create(input) {
+      const building = { id: nextId++, name: input.name, address: input.address, createdAt: new Date() };
+      data.buildings.push(building);
+      return withRoomsCount(building);
     },
   };
 }

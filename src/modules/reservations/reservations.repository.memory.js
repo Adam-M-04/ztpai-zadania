@@ -1,47 +1,53 @@
-function createReservationsRepository() {
-  const reservations = [
-    {
-      id: 1,
-      roomId: 3,
-      reservedBy: "Piotr Wiśniewski",
-      participants: 25,
-      startTime: new Date("2026-10-15T08:00:00.000Z"),
-      endTime: new Date("2026-10-15T10:00:00.000Z"),
-      status: "CONFIRMED",
-      createdAt: new Date("2026-10-01T12:00:00.000Z"),
-      cancelledAt: null,
-      internalNote: "seed",
-    },
-  ];
+function createReservationsRepository(data) {
+  let nextId = Math.max(0, ...data.reservations.map((r) => r.id)) + 1;
 
-  let nextId = Math.max(0, ...reservations.map((r) => r.id)) + 1;
+  function withRoom(reservation) {
+    const room = data.rooms.find((r) => r.id === reservation.roomId);
+    const building = data.buildings.find((b) => b.id === room.buildingId);
+    return {
+      ...reservation,
+      room: { id: room.id, name: room.name, building: { id: building.id, name: building.name } },
+    };
+  }
 
   return {
     async findAll(filters) {
-      if (filters.roomId === undefined) {
-        return reservations;
+      let result = data.reservations;
+      if (filters.roomId !== undefined) {
+        result = result.filter((r) => r.roomId === filters.roomId);
       }
-      return reservations.filter((r) => r.roomId === filters.roomId);
+      return result.map(withRoom);
     },
 
     async findById(id) {
-      return reservations.find((r) => r.id === id) ?? null;
+      const reservation = data.reservations.find((r) => r.id === id);
+      return reservation ? withRoom(reservation) : null;
     },
 
     async findByRoomAndStatus(roomId, status) {
-      return reservations.filter((r) => r.roomId === roomId && r.status === status);
+      return data.reservations.filter((r) => r.roomId === roomId && r.status === status).map(withRoom);
     },
 
-    async create(data) {
-      const reservation = { id: nextId++, ...data };
-      reservations.push(reservation);
-      return reservation;
+    async create(input) {
+      const reservation = {
+        id: nextId++,
+        roomId: input.roomId,
+        reservedBy: input.reservedBy,
+        participants: input.participants,
+        startTime: input.startTime,
+        endTime: input.endTime,
+        status: input.status,
+        createdAt: input.createdAt,
+        cancelledAt: input.cancelledAt,
+      };
+      data.reservations.push(reservation);
+      return withRoom(reservation);
     },
 
     async update(id, changes) {
-      const reservation = reservations.find((r) => r.id === id);
+      const reservation = data.reservations.find((r) => r.id === id);
       Object.assign(reservation, changes);
-      return reservation;
+      return withRoom(reservation);
     },
   };
 }

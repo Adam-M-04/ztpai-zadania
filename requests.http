@@ -28,12 +28,24 @@ GET {{host}}/api/buildings/99
 
 ###
 
+GET {{host}}/api/buildings/1/rooms
+
+###
+
+GET {{host}}/api/buildings/3/rooms
+
+###
+
+GET {{host}}/api/buildings/99/rooms
+
+###
+
 POST {{host}}/api/buildings
 Content-Type: application/json
 
 {
-  "name": "Budynek C",
-  "address": "ul. Długa 5, Kraków"
+  "name": "Budynek D",
+  "address": "ul. Krótka 7, Kraków"
 }
 
 ###
