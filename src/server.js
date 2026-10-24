@@ -1,12 +1,15 @@
 const { createApp } = require("./app");
-const { createRoomsRepository } = require("./modules/rooms/rooms.repository.memory");
-const { createReservationsRepository } = require("./modules/reservations/reservations.repository.memory");
+const db = require("./db");
+const { createBuildingsRepository } = require("./modules/buildings/buildings.repository.knex");
+const { createRoomsRepository } = require("./modules/rooms/rooms.repository.knex");
+const { createReservationsRepository } = require("./modules/reservations/reservations.repository.knex");
 
 const PORT = 3000;
 
 const app = createApp({
-  roomsRepository: createRoomsRepository(),
-  reservationsRepository: createReservationsRepository(),
+  buildingsRepository: createBuildingsRepository(db),
+  roomsRepository: createRoomsRepository(db),
+  reservationsRepository: createReservationsRepository(db),
 });
 
 app.listen(PORT, () => {

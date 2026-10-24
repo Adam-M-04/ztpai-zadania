@@ -16,6 +16,81 @@ GET {{host}}/api/rooms/abc
 
 ###
 
+GET {{host}}/api/buildings
+
+###
+
+GET {{host}}/api/buildings/1
+
+###
+
+GET {{host}}/api/buildings/99
+
+###
+
+POST {{host}}/api/buildings
+Content-Type: application/json
+
+{
+  "name": "Budynek C",
+  "address": "ul. Długa 5, Kraków"
+}
+
+###
+
+POST {{host}}/api/buildings
+Content-Type: application/json
+
+{
+  "name": "Budynek A",
+  "address": "ul. Inna 1, Kraków"
+}
+
+###
+
+POST {{host}}/api/buildings
+Content-Type: application/json
+
+{
+  "name": "X",
+  "extra": 1
+}
+
+###
+
+POST {{host}}/api/rooms
+Content-Type: application/json
+
+{
+  "buildingId": 2,
+  "name": "102",
+  "capacity": 25
+}
+
+###
+
+POST {{host}}/api/rooms
+Content-Type: application/json
+
+{
+  "buildingId": 1,
+  "name": "101",
+  "capacity": 25
+}
+
+###
+
+POST {{host}}/api/rooms
+Content-Type: application/json
+
+{
+  "buildingId": 99,
+  "name": "101",
+  "capacity": 25
+}
+
+###
+
 GET {{host}}/api/reservations
 
 ###

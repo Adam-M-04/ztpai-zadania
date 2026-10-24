@@ -22,6 +22,16 @@ function errorHandler(err, req, res, next) {
     });
   }
 
+  if (err.code === "23505") {
+    return res.status(409).json({
+      error: {
+        code: "ALREADY_EXISTS",
+        message: "Resource with this name already exists",
+        requestId: req.id,
+      },
+    });
+  }
+
   console.error(`[${req.id}]`, err);
 
   res.status(500).json({
