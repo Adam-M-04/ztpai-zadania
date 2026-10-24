@@ -10,7 +10,17 @@ const ALLOWED_TRANSITIONS = {
 
 function createReservationsService({ reservationsRepository, roomsRepository, now = () => new Date() }) {
   async function listReservations(filters) {
-    return reservationsRepository.findAll(filters);
+    const { data, total } = await reservationsRepository.findAll(filters);
+
+    return {
+      data,
+      meta: {
+        page: filters.page,
+        limit: filters.limit,
+        total,
+        totalPages: Math.ceil(total / filters.limit),
+      },
+    };
   }
 
   async function getReservation(id) {

@@ -12,11 +12,37 @@ function createReservationsRepository(data) {
 
   return {
     async findAll(filters) {
-      let result = data.reservations;
+      let result = data.reservations.map(withRoom);
+
       if (filters.roomId !== undefined) {
         result = result.filter((r) => r.roomId === filters.roomId);
       }
-      return result.map(withRoom);
+      if (filters.buildingId !== undefined) {
+        result = result.filter((r) => r.room.building.id === filters.buildingId);
+      }
+      if (filters.status !== undefined) {
+        result = result.filter((r) => r.status === filters.status);
+      }
+      if (filters.from !== undefined) {
+        result = result.filter((r) => r.endTime > new Date(filters.from));
+      }
+      if (filters.to !== undefined) {
+        result = result.filter((r) => r.startTime < new Date(filters.to));
+      }
+
+      const desc = filters.sort.startsWith("-");
+      const field = desc ? filters.sort.slice(1) : filters.sort;
+
+      result.sort((a, b) => {
+        const diff = a[field] - b[field];
+        if (diff !== 0) {
+          return desc ? -diff : diff;
+        }
+        return a.id - b.id;
+      });
+
+      const start = (filters.page - 1) * filters.limit;
+      return { data: result.slice(start, start + filters.limit), total: result.length };
     },
 
     async findById(id) {

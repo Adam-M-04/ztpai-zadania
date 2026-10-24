@@ -9,6 +9,12 @@ const columns = {
   cancelledAt: "cancelled_at",
 };
 
+const sortColumns = {
+  startTime: "res.start_time",
+  createdAt: "res.created_at",
+  participants: "res.participants",
+};
+
 function toReservation(row) {
   return {
     id: row.id,
@@ -45,6 +51,25 @@ function selectReservations(db) {
     .select("res.*", "r.name as room_name", "b.id as building_id", "b.name as building_name");
 }
 
+function applyFilters(query, filters) {
+  if (filters.roomId !== undefined) {
+    query.where("res.room_id", filters.roomId);
+  }
+  if (filters.buildingId !== undefined) {
+    query.where("r.building_id", filters.buildingId);
+  }
+  if (filters.status !== undefined) {
+    query.where("res.status", filters.status);
+  }
+  if (filters.from !== undefined) {
+    query.where("res.end_time", ">", filters.from);
+  }
+  if (filters.to !== undefined) {
+    query.where("res.start_time", "<", filters.to);
+  }
+  return query;
+}
+
 function createReservationsRepository(db) {
   async function findById(id) {
     const row = await selectReservations(db).where("res.id", id).first();
@@ -53,12 +78,21 @@ function createReservationsRepository(db) {
 
   return {
     async findAll(filters) {
-      const query = selectReservations(db).orderBy("res.id");
-      if (filters.roomId !== undefined) {
-        query.where("res.room_id", filters.roomId);
-      }
-      const rows = await query;
-      return rows.map(toReservation);
+      const desc = filters.sort.startsWith("-");
+      const column = sortColumns[desc ? filters.sort.slice(1) : filters.sort];
+
+      const rows = await applyFilters(selectReservations(db), filters)
+        .orderBy(column, desc ? "desc" : "asc")
+        .orderBy("res.id", "asc")
+        .limit(filters.limit)
+        .offset((filters.page - 1) * filters.limit);
+
+      const [{ count }] = await applyFilters(
+        db("reservations as res").join("rooms as r", "r.id", "res.room_id"),
+        filters
+      ).count("res.id as count");
+
+      return { data: rows.map(toReservation), total: Number(count) };
     },
 
     findById,

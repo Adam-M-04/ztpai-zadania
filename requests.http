@@ -132,6 +132,34 @@ GET {{host}}/api/reservations?roomId=abc
 
 ###
 
+GET {{host}}/api/reservations?roomId=1&status=CONFIRMED
+
+###
+
+GET {{host}}/api/reservations?buildingId=1&from=2026-11-01T00:00:00Z&to=2026-11-30T23:59:59Z&sort=-startTime
+
+###
+
+GET {{host}}/api/reservations?limit=2&page=2&sort=-participants
+
+###
+
+GET {{host}}/api/reservations?from=2026-11-10T11:00:00Z&to=2026-11-10T11:30:00Z
+
+###
+
+GET {{host}}/api/reservations?page=99
+
+###
+
+GET {{host}}/api/reservations?sort=name
+
+###
+
+GET {{host}}/api/reservations?from=2026-11-10T12:00:00Z&to=2026-11-10T10:00:00Z
+
+###
+
 POST {{host}}/api/reservations
 Content-Type: application/json
 
