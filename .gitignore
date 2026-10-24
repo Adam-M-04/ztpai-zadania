@@ -3,3 +3,4 @@ node_modules/
 .idea/
 sprawozdanie-*.pdf
 screenshoots/
+.env
