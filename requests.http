@@ -107,19 +107,6 @@ GET {{host}}/api/reservations
 
 ###
 
-POST {{host}}/api/reservations
-Content-Type: application/json
-
-{
-  "roomId": 1,
-  "reservedBy": "Jan Kowalski",
-  "participants": 20,
-  "startTime": "2026-11-10T10:00:00Z",
-  "endTime": "2026-11-10T12:00:00Z"
-}
-
-###
-
 GET {{host}}/api/reservations/2
 
 ###
@@ -157,6 +144,19 @@ GET {{host}}/api/reservations?sort=name
 ###
 
 GET {{host}}/api/reservations?from=2026-11-10T12:00:00Z&to=2026-11-10T10:00:00Z
+
+###
+
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 5,
+  "reservedBy": "Maria Wójcik",
+  "participants": 30,
+  "startTime": "2026-11-10T10:00:00Z",
+  "endTime": "2026-11-10T12:00:00Z"
+}
 
 ###
 
@@ -264,11 +264,11 @@ Content-Type: application/json
 
 ###
 
-PATCH {{host}}/api/reservations/6/cancel
+PATCH {{host}}/api/reservations/10/cancel
 
 ###
 
-PATCH {{host}}/api/reservations/6/cancel
+PATCH {{host}}/api/reservations/10/cancel
 
 ###
 
@@ -382,14 +382,6 @@ Content-Type: application/json
   "endTime": "jutro",
   "status": "CANCELLED"
 }
-
-###
-
-POST {{host}}/api/reservations
-Content-Type: application/json
-
-{
-  "roomId": 1,
 
 ###
 
