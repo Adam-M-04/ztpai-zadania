@@ -1,4 +1,6 @@
 const express = require("express");
+const swaggerUi = require("swagger-ui-express");
+const openapi = require("./docs/openapi");
 const requestLogger = require("./middleware/requestLogger");
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
@@ -27,6 +29,7 @@ function createApp({ usersRepository, buildingsRepository, roomsRepository, rese
   const roomsService = createRoomsService({ roomsRepository, buildingsRepository });
   const reservationsService = createReservationsService({ reservationsRepository, runInTransaction, now });
 
+  app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openapi, { swaggerOptions: { persistAuthorization: true } }));
   app.use("/api/auth", createAuthRouter(createAuthController(authService)));
 
   app.use("/api", authenticate);
