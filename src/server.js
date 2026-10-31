@@ -1,10 +1,9 @@
+const config = require("./config");
 const { createApp } = require("./app");
 const db = require("./db");
 const { createBuildingsRepository } = require("./modules/buildings/buildings.repository.knex");
 const { createRoomsRepository } = require("./modules/rooms/rooms.repository.knex");
 const { createReservationsRepository } = require("./modules/reservations/reservations.repository.knex");
-
-const PORT = 3000;
 
 function runInTransaction(work) {
   return db.transaction((trx) =>
@@ -22,6 +21,6 @@ const app = createApp({
   runInTransaction,
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.listen(config.port, () => {
+  console.log(`Server running on http://localhost:${config.port}`);
 });
