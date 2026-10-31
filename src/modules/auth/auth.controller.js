@@ -6,6 +6,16 @@ function createAuthController(authService) {
       const user = await authService.register(req.validated.body);
       res.status(201).json(toUserResponse(user));
     },
+
+    async login(req, res) {
+      const result = await authService.login(req.validated.body);
+      res.json(result);
+    },
+
+    async me(req, res) {
+      const user = await authService.getCurrentUser(req.user);
+      res.json(toUserResponse(user));
+    },
   };
 }
 

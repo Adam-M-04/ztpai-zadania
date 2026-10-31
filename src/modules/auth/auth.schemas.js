@@ -7,4 +7,11 @@ const registerBody = z
   })
   .strict();
 
-module.exports = { registerBody };
+const loginBody = z
+  .object({
+    email: z.string().trim().toLowerCase().pipe(z.email()),
+    password: z.string().min(1).max(72),
+  })
+  .strict();
+
+module.exports = { registerBody, loginBody };
