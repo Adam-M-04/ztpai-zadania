@@ -1,17 +1,25 @@
 const db = require("../src/db");
+const config = require("../src/config");
 
 const URL = "http://localhost:3000/api/reservations";
+const LOGIN_URL = "http://localhost:3000/api/auth/login";
 const REQUESTS = 10;
 
 const body = {
   roomId: 2,
-  reservedBy: "Jan Kowalski",
   participants: 10,
   startTime: "2026-12-01T10:00:00.000Z",
   endTime: "2026-12-01T12:00:00.000Z",
 };
 
 async function main() {
+  const loginResponse = await fetch(LOGIN_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: "jan.kowalski@example.com", password: config.seed.userPassword }),
+  });
+  const { accessToken } = await loginResponse.json();
+
   await db.raw("DELETE FROM reservations WHERE room_id = ? AND start_time < ? AND end_time > ?", [
     body.roomId,
     body.endTime,
@@ -23,7 +31,7 @@ async function main() {
     requests.push(
       fetch(URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify(body),
       })
     );

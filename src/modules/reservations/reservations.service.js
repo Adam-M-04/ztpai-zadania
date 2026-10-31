@@ -33,7 +33,7 @@ function createReservationsService({ reservationsRepository, runInTransaction, n
     return reservation;
   }
 
-  async function createReservation(input) {
+  async function createReservation(input, currentUser) {
     return runInTransaction(async ({ roomsRepository, reservationsRepository }) => {
       const room = await roomsRepository.findByIdForUpdate(input.roomId);
 
@@ -75,7 +75,7 @@ function createReservationsService({ reservationsRepository, runInTransaction, n
 
       return reservationsRepository.create({
         roomId: room.id,
-        reservedBy: input.reservedBy,
+        userId: currentUser.id,
         participants: input.participants,
         startTime: new Date(start),
         endTime: new Date(end),

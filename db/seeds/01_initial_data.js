@@ -37,7 +37,7 @@ exports.seed = async function (knex) {
   await knex("reservations").insert([
     {
       room_id: 3,
-      reserved_by: "Piotr Wiśniewski",
+      user_id: 2,
       participants: 25,
       start_time: "2026-10-15T08:00:00Z",
       end_time: "2026-10-15T10:00:00Z",
@@ -46,7 +46,7 @@ exports.seed = async function (knex) {
     },
     {
       room_id: 1,
-      reserved_by: "Jan Kowalski",
+      user_id: 3,
       participants: 20,
       start_time: "2026-11-10T10:00:00Z",
       end_time: "2026-11-10T12:00:00Z",
@@ -55,7 +55,7 @@ exports.seed = async function (knex) {
     },
     {
       room_id: 1,
-      reserved_by: "Anna Nowak",
+      user_id: 4,
       participants: 15,
       start_time: "2026-11-12T09:00:00Z",
       end_time: "2026-11-12T11:00:00Z",
@@ -65,7 +65,7 @@ exports.seed = async function (knex) {
     },
     {
       room_id: 4,
-      reserved_by: "Tomasz Zieliński",
+      user_id: 5,
       participants: 10,
       start_time: "2026-11-13T12:00:00Z",
       end_time: "2026-11-13T14:00:00Z",
@@ -74,7 +74,7 @@ exports.seed = async function (knex) {
     },
     {
       room_id: 5,
-      reserved_by: "Katarzyna Lewandowska",
+      user_id: 6,
       participants: 35,
       start_time: "2026-11-20T08:00:00Z",
       end_time: "2026-11-20T12:00:00Z",

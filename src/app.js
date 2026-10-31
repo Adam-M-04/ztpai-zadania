@@ -2,6 +2,7 @@ const express = require("express");
 const requestLogger = require("./middleware/requestLogger");
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
+const authenticate = require("./middleware/authenticate");
 const { createAuthService } = require("./modules/auth/auth.service");
 const { createAuthController } = require("./modules/auth/auth.controller");
 const { createAuthRouter } = require("./modules/auth/auth.routes");
@@ -27,6 +28,9 @@ function createApp({ usersRepository, buildingsRepository, roomsRepository, rese
   const reservationsService = createReservationsService({ reservationsRepository, runInTransaction, now });
 
   app.use("/api/auth", createAuthRouter(createAuthController(authService)));
+
+  app.use("/api", authenticate);
+
   app.use("/api/buildings", createBuildingsRouter(createBuildingsController(buildingsService)));
   app.use("/api/rooms", createRoomsRouter(createRoomsController(roomsService)));
   app.use("/api/reservations", createReservationsRouter(createReservationsController(reservationsService)));
