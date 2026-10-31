@@ -1,5 +1,24 @@
+const bcrypt = require("bcryptjs");
+const config = require("../../src/config");
+
 exports.seed = async function (knex) {
-  await knex.raw("TRUNCATE reservations, rooms, buildings RESTART IDENTITY CASCADE");
+  if (!config.seed.adminPassword || !config.seed.userPassword) {
+    throw new Error("SEED_ADMIN_PASSWORD and SEED_USER_PASSWORD must be set in .env");
+  }
+
+  await knex.raw("TRUNCATE reservations, rooms, buildings, users RESTART IDENTITY CASCADE");
+
+  const adminHash = await bcrypt.hash(config.seed.adminPassword, 12);
+  const userHash = await bcrypt.hash(config.seed.userPassword, 12);
+
+  await knex("users").insert([
+    { email: "admin@example.com", password_hash: adminHash, role: "ADMIN", created_at: "2026-09-01T08:00:00Z" },
+    { email: "piotr.wisniewski@example.com", password_hash: userHash, role: "USER", created_at: "2026-09-10T08:00:00Z" },
+    { email: "jan.kowalski@example.com", password_hash: userHash, role: "USER", created_at: "2026-09-10T08:00:00Z" },
+    { email: "anna.nowak@example.com", password_hash: userHash, role: "USER", created_at: "2026-09-10T08:00:00Z" },
+    { email: "tomasz.zielinski@example.com", password_hash: userHash, role: "USER", created_at: "2026-09-10T08:00:00Z" },
+    { email: "katarzyna.lewandowska@example.com", password_hash: userHash, role: "USER", created_at: "2026-09-10T08:00:00Z" },
+  ]);
 
   await knex("buildings").insert([
     { name: "Budynek A", address: "ul. Warszawska 24, Kraków", created_at: "2026-09-01T08:00:00Z" },

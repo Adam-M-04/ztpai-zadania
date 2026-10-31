@@ -2,6 +2,9 @@ const express = require("express");
 const requestLogger = require("./middleware/requestLogger");
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
+const { createAuthService } = require("./modules/auth/auth.service");
+const { createAuthController } = require("./modules/auth/auth.controller");
+const { createAuthRouter } = require("./modules/auth/auth.routes");
 const { createBuildingsService } = require("./modules/buildings/buildings.service");
 const { createBuildingsController } = require("./modules/buildings/buildings.controller");
 const { createBuildingsRouter } = require("./modules/buildings/buildings.routes");
@@ -12,16 +15,18 @@ const { createReservationsService } = require("./modules/reservations/reservatio
 const { createReservationsController } = require("./modules/reservations/reservations.controller");
 const { createReservationsRouter } = require("./modules/reservations/reservations.routes");
 
-function createApp({ buildingsRepository, roomsRepository, reservationsRepository, runInTransaction, now }) {
+function createApp({ usersRepository, buildingsRepository, roomsRepository, reservationsRepository, runInTransaction, now }) {
   const app = express();
 
   app.use(requestLogger);
   app.use(express.json());
 
+  const authService = createAuthService({ usersRepository });
   const buildingsService = createBuildingsService({ buildingsRepository, roomsRepository });
   const roomsService = createRoomsService({ roomsRepository, buildingsRepository });
   const reservationsService = createReservationsService({ reservationsRepository, runInTransaction, now });
 
+  app.use("/api/auth", createAuthRouter(createAuthController(authService)));
   app.use("/api/buildings", createBuildingsRouter(createBuildingsController(buildingsService)));
   app.use("/api/rooms", createRoomsRouter(createRoomsController(roomsService)));
   app.use("/api/reservations", createReservationsRouter(createReservationsController(reservationsService)));

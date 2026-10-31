@@ -14,6 +14,8 @@ const envSchema = z.object({
     .string()
     .regex(/^\d+[smhd]$/, "must be a number with unit s, m, h or d (e.g. 15m)")
     .default("15m"),
+  SEED_ADMIN_PASSWORD: z.string().min(10).max(72).optional(),
+  SEED_USER_PASSWORD: z.string().min(10).max(72).optional(),
 });
 
 const result = envSchema.safeParse(process.env);
@@ -35,5 +37,9 @@ module.exports = {
   jwt: {
     secret: env.JWT_SECRET,
     expiresIn: env.JWT_EXPIRES_IN,
+  },
+  seed: {
+    adminPassword: env.SEED_ADMIN_PASSWORD,
+    userPassword: env.SEED_USER_PASSWORD,
   },
 };

@@ -1,6 +1,7 @@
 const config = require("./config");
 const { createApp } = require("./app");
 const db = require("./db");
+const { createUsersRepository } = require("./modules/users/users.repository.knex");
 const { createBuildingsRepository } = require("./modules/buildings/buildings.repository.knex");
 const { createRoomsRepository } = require("./modules/rooms/rooms.repository.knex");
 const { createReservationsRepository } = require("./modules/reservations/reservations.repository.knex");
@@ -15,6 +16,7 @@ function runInTransaction(work) {
 }
 
 const app = createApp({
+  usersRepository: createUsersRepository(db),
   buildingsRepository: createBuildingsRepository(db),
   roomsRepository: createRoomsRepository(db),
   reservationsRepository: createReservationsRepository(db),
