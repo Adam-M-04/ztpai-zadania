@@ -3,12 +3,12 @@ const { toReservationResponse } = require("./reservations.mapper");
 function createReservationsController(reservationsService) {
   return {
     async list(req, res) {
-      const result = await reservationsService.listReservations(req.validated.query);
+      const result = await reservationsService.listReservations(req.validated.query, req.user);
       res.json({ data: result.data.map(toReservationResponse), meta: result.meta });
     },
 
     async getById(req, res) {
-      const reservation = await reservationsService.getReservation(req.validated.params.id);
+      const reservation = await reservationsService.getReservation(req.validated.params.id, req.user);
       res.json(toReservationResponse(reservation));
     },
 
@@ -21,7 +21,7 @@ function createReservationsController(reservationsService) {
     },
 
     async cancel(req, res) {
-      const reservation = await reservationsService.cancelReservation(req.validated.params.id);
+      const reservation = await reservationsService.cancelReservation(req.validated.params.id, req.user);
       res.json(toReservationResponse(reservation));
     },
   };

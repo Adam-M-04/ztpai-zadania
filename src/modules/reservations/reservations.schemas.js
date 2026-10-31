@@ -8,6 +8,7 @@ const listReservationsQuery = z
   .object({
     roomId: z.coerce.number().int().positive().optional(),
     buildingId: z.coerce.number().int().positive().optional(),
+    userId: z.coerce.number().int().positive().optional(),
     status: z.enum(["CONFIRMED", "CANCELLED"]).optional(),
     from: z.iso.datetime({ offset: true }).optional(),
     to: z.iso.datetime({ offset: true }).optional(),

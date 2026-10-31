@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const validate = require("../../middleware/validate");
+const authorize = require("../../middleware/authorize");
 const { roomIdParams, createRoomBody } = require("./rooms.schemas");
 
 function createRoomsRouter(controller) {
@@ -7,7 +8,7 @@ function createRoomsRouter(controller) {
 
   router.get("/", controller.list);
   router.get("/:id", validate({ params: roomIdParams }), controller.getById);
-  router.post("/", validate({ body: createRoomBody }), controller.create);
+  router.post("/", authorize("ADMIN"), validate({ body: createRoomBody }), controller.create);
 
   return router;
 }

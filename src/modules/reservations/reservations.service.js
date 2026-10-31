@@ -1,4 +1,4 @@
-const { NotFoundError, ConflictError, ValidationError } = require("../../errors/AppError");
+const { NotFoundError, ConflictError, ValidationError, ForbiddenError } = require("../../errors/AppError");
 
 const MIN_DURATION = 15 * 60 * 1000;
 const MAX_DURATION = 8 * 60 * 60 * 1000;
@@ -8,8 +8,19 @@ const ALLOWED_TRANSITIONS = {
   CANCELLED: [],
 };
 
+function canAccess(reservation, currentUser) {
+  return currentUser.role === "ADMIN" || reservation.userId === currentUser.id;
+}
+
 function createReservationsService({ reservationsRepository, runInTransaction, now = () => new Date() }) {
-  async function listReservations(filters) {
+  async function listReservations(filters, currentUser) {
+    if (currentUser.role !== "ADMIN") {
+      if (filters.userId !== undefined) {
+        throw new ForbiddenError("Only ADMIN can filter reservations by userId");
+      }
+      filters = { ...filters, userId: currentUser.id };
+    }
+
     const { data, total } = await reservationsRepository.findAll(filters);
 
     return {
@@ -23,10 +34,10 @@ function createReservationsService({ reservationsRepository, runInTransaction, n
     };
   }
 
-  async function getReservation(id) {
+  async function getReservation(id, currentUser) {
     const reservation = await reservationsRepository.findById(id);
 
-    if (!reservation) {
+    if (!reservation || !canAccess(reservation, currentUser)) {
       throw new NotFoundError("Reservation");
     }
 
@@ -87,8 +98,8 @@ function createReservationsService({ reservationsRepository, runInTransaction, n
     });
   }
 
-  async function cancelReservation(id) {
-    const reservation = await getReservation(id);
+  async function cancelReservation(id, currentUser) {
+    const reservation = await getReservation(id, currentUser);
 
     if (reservation.status === "CANCELLED") {
       return reservation;
