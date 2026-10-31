@@ -15,10 +15,6 @@ const { createReservationsRouter } = require("./modules/reservations/reservation
 function createApp({ buildingsRepository, roomsRepository, reservationsRepository, runInTransaction, now }) {
   const app = express();
 
-  if (!runInTransaction) {
-    runInTransaction = (work) => work({ roomsRepository, reservationsRepository });
-  }
-
   app.use(requestLogger);
   app.use(express.json());
 
