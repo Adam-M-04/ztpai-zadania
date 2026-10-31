@@ -4,3 +4,4 @@ node_modules/
 sprawozdanie-*.pdf
 screenshoots/
 .env
+http-client.private.env.json

@@ -1,75 +1,166 @@
 @host = http://localhost:3000
 
-GET {{host}}/api/rooms
+### logowanie ADMIN
+POST {{host}}/api/auth/login
+Content-Type: application/json
 
-###
+{
+  "email": "admin@example.com",
+  "password": "{{adminPassword}}"
+}
 
-GET {{host}}/api/rooms/1
+> {% client.global.set("adminToken", response.body.accessToken); %}
 
-###
+### logowanie USER wlasciciel (jan.kowalski, rezerwacja 2)
+POST {{host}}/api/auth/login
+Content-Type: application/json
 
-GET {{host}}/api/rooms/99
+{
+  "email": "jan.kowalski@example.com",
+  "password": "{{userPassword}}"
+}
 
-###
+> {%
+  const token = response.body.accessToken;
+  client.global.set("userToken", token);
+  const last = token.charAt(token.length - 2) === "A" ? "B" : "A";
+  client.global.set("badSignatureToken", token.slice(0, -2) + last + token.slice(-1));
+%}
 
-GET {{host}}/api/rooms/abc
+### logowanie USER obcy (anna.nowak)
+POST {{host}}/api/auth/login
+Content-Type: application/json
 
-###
+{
+  "email": "anna.nowak@example.com",
+  "password": "{{userPassword}}"
+}
 
+> {% client.global.set("otherToken", response.body.accessToken); %}
+
+### rejestracja
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "Jan.Nowicki@Example.com",
+  "password": "bardzo-dlugie-haslo"
+}
+
+### rejestracja z rola ADMIN
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "hacker@example.com",
+  "password": "bardzo-dlugie-haslo",
+  "role": "ADMIN"
+}
+
+### rejestracja za krotkie haslo
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "krotkie@example.com",
+  "password": "krotkie"
+}
+
+### rejestracja duplikat emaila (inna wielkosc liter)
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "JAN.NOWICKI@example.COM",
+  "password": "inne-dlugie-haslo"
+}
+
+### logowanie zarejestrowanego uzytkownika
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "jan.nowicki@example.com",
+  "password": "bardzo-dlugie-haslo"
+}
+
+### logowanie zly email
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "nie.ma.mnie@example.com",
+  "password": "bardzo-dlugie-haslo"
+}
+
+### logowanie zle haslo
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "jan.nowicki@example.com",
+  "password": "zle-haslo-123"
+}
+
+### me USER
+GET {{host}}/api/auth/me
+Authorization: Bearer {{userToken}}
+
+### me ADMIN
+GET {{host}}/api/auth/me
+Authorization: Bearer {{adminToken}}
+
+### 401 brak naglowka
+GET {{host}}/api/reservations
+
+### 401 Basic
+GET {{host}}/api/reservations
+Authorization: Basic amFuOmhhc2xv
+
+### 401 Bearer bez tokenu
+GET {{host}}/api/reservations
+Authorization: Bearer
+
+### 401 zly podpis
+GET {{host}}/api/reservations
+Authorization: Bearer {{badSignatureToken}}
+
+### 401 zmieniony payload (role ADMIN, oryginalny podpis)
+GET {{host}}/api/reservations
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiQURNSU4iLCJpYXQiOjE3OTM0Mzk5MDksImV4cCI6MTc5MzQ0MDgwOSwic3ViIjoiNyJ9.1NVV5lt3Tv5_RbdmlWkXmXRDrJwirboHKoTD6y10jY0
+
+### 401 token wygasly
+GET {{host}}/api/reservations
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiVVNFUiIsImlhdCI6MTc5MzQzOTkzMSwiZXhwIjoxNzkzNDM5OTQxLCJzdWIiOiI3In0.KKhubxeQUeMldurftxMl75VfpbP7LSxCuzTDsspY1yQ
+
+### brak tokenu - me
+GET {{host}}/api/auth/me
+
+### brak tokenu - buildings
 GET {{host}}/api/buildings
 
-###
-
+### brak tokenu - building
 GET {{host}}/api/buildings/1
 
-###
-
-GET {{host}}/api/buildings/99
-
-###
-
+### brak tokenu - building rooms
 GET {{host}}/api/buildings/1/rooms
 
-###
-
-GET {{host}}/api/buildings/3/rooms
-
-###
-
-GET {{host}}/api/buildings/99/rooms
-
-###
-
+### brak tokenu - nowy budynek
 POST {{host}}/api/buildings
 Content-Type: application/json
 
 {
-  "name": "Budynek D",
+  "name": "Budynek E",
   "address": "ul. Krótka 7, Kraków"
 }
 
-###
+### brak tokenu - rooms
+GET {{host}}/api/rooms
 
-POST {{host}}/api/buildings
-Content-Type: application/json
+### brak tokenu - room
+GET {{host}}/api/rooms/1
 
-{
-  "name": "Budynek A",
-  "address": "ul. Inna 1, Kraków"
-}
-
-###
-
-POST {{host}}/api/buildings
-Content-Type: application/json
-
-{
-  "name": "X",
-  "extra": 1
-}
-
-###
-
+### brak tokenu - nowa sala
 POST {{host}}/api/rooms
 Content-Type: application/json
 
@@ -79,10 +170,140 @@ Content-Type: application/json
   "capacity": 25
 }
 
-###
+### brak tokenu - rezerwacje z userId
+GET {{host}}/api/reservations?userId=3
 
+### brak tokenu - rezerwacja
+GET {{host}}/api/reservations/2
+
+### brak tokenu - nowa rezerwacja
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "roomId": 2,
+  "participants": 5,
+  "startTime": "2026-12-18T10:00:00Z",
+  "endTime": "2026-12-18T11:00:00Z"
+}
+
+### brak tokenu - anulowanie
+PATCH {{host}}/api/reservations/2/cancel
+
+### USER buildings
+GET {{host}}/api/buildings
+Authorization: Bearer {{userToken}}
+
+### ADMIN buildings
+GET {{host}}/api/buildings
+Authorization: Bearer {{adminToken}}
+
+### USER building
+GET {{host}}/api/buildings/1
+Authorization: Bearer {{userToken}}
+
+### ADMIN building
+GET {{host}}/api/buildings/1
+Authorization: Bearer {{adminToken}}
+
+### USER building 404
+GET {{host}}/api/buildings/99
+Authorization: Bearer {{userToken}}
+
+### USER building rooms
+GET {{host}}/api/buildings/1/rooms
+Authorization: Bearer {{userToken}}
+
+### ADMIN building rooms
+GET {{host}}/api/buildings/1/rooms
+Authorization: Bearer {{adminToken}}
+
+### USER nowy budynek 403
+POST {{host}}/api/buildings
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "name": "Budynek E",
+  "address": "ul. Krótka 7, Kraków"
+}
+
+### ADMIN nowy budynek
+POST {{host}}/api/buildings
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Budynek E",
+  "address": "ul. Krótka 7, Kraków"
+}
+
+### ADMIN nowy budynek duplikat nazwy
+POST {{host}}/api/buildings
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Budynek A",
+  "address": "ul. Inna 1, Kraków"
+}
+
+### ADMIN nowy budynek niepoprawne dane
+POST {{host}}/api/buildings
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "X",
+  "extra": 1
+}
+
+### USER rooms
+GET {{host}}/api/rooms
+Authorization: Bearer {{userToken}}
+
+### ADMIN rooms
+GET {{host}}/api/rooms
+Authorization: Bearer {{adminToken}}
+
+### USER room
+GET {{host}}/api/rooms/1
+Authorization: Bearer {{userToken}}
+
+### ADMIN room
+GET {{host}}/api/rooms/1
+Authorization: Bearer {{adminToken}}
+
+### USER room niepoprawne id
+GET {{host}}/api/rooms/abc
+Authorization: Bearer {{userToken}}
+
+### USER nowa sala 403
 POST {{host}}/api/rooms
 Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "buildingId": 2,
+  "name": "102",
+  "capacity": 25
+}
+
+### ADMIN nowa sala
+POST {{host}}/api/rooms
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "buildingId": 2,
+  "name": "102",
+  "capacity": 25
+}
+
+### ADMIN nowa sala duplikat nazwy w budynku
+POST {{host}}/api/rooms
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
 
 {
   "buildingId": 1,
@@ -90,10 +311,10 @@ Content-Type: application/json
   "capacity": 25
 }
 
-###
-
+### ADMIN nowa sala budynek nie istnieje
 POST {{host}}/api/rooms
 Content-Type: application/json
+Authorization: Bearer {{adminToken}}
 
 {
   "buildingId": 99,
@@ -101,292 +322,212 @@ Content-Type: application/json
   "capacity": 25
 }
 
-###
-
+### USER wlasciciel rezerwacje (tylko swoje)
 GET {{host}}/api/reservations
+Authorization: Bearer {{userToken}}
 
-###
+### USER obcy rezerwacje (tylko swoje)
+GET {{host}}/api/reservations
+Authorization: Bearer {{otherToken}}
 
-GET {{host}}/api/reservations/2
+### ADMIN rezerwacje (wszystkie)
+GET {{host}}/api/reservations
+Authorization: Bearer {{adminToken}}
 
-###
+### USER wlasciciel filtr userId 403
+GET {{host}}/api/reservations?userId=3
+Authorization: Bearer {{userToken}}
 
+### USER obcy filtr userId 403
+GET {{host}}/api/reservations?userId=3
+Authorization: Bearer {{otherToken}}
+
+### ADMIN filtr userId
+GET {{host}}/api/reservations?userId=3
+Authorization: Bearer {{adminToken}}
+
+### USER filtry i paginacja nadal dzialaja
+GET {{host}}/api/reservations?status=CONFIRMED&limit=1&sort=-startTime
+Authorization: Bearer {{userToken}}
+
+### ADMIN filtr roomId
 GET {{host}}/api/reservations?roomId=1
+Authorization: Bearer {{adminToken}}
 
-###
-
+### ADMIN niepoprawny roomId
 GET {{host}}/api/reservations?roomId=abc
+Authorization: Bearer {{adminToken}}
 
-###
-
+### ADMIN roomId + status
 GET {{host}}/api/reservations?roomId=1&status=CONFIRMED
+Authorization: Bearer {{adminToken}}
 
-###
-
+### ADMIN buildingId + zakres dat + sortowanie
 GET {{host}}/api/reservations?buildingId=1&from=2026-11-01T00:00:00Z&to=2026-11-30T23:59:59Z&sort=-startTime
+Authorization: Bearer {{adminToken}}
 
-###
-
+### ADMIN paginacja
 GET {{host}}/api/reservations?limit=2&page=2&sort=-participants
+Authorization: Bearer {{adminToken}}
 
-###
-
-GET {{host}}/api/reservations?from=2026-11-10T11:00:00Z&to=2026-11-10T11:30:00Z
-
-###
-
-GET {{host}}/api/reservations?page=99
-
-###
-
+### ADMIN niepoprawny sort
 GET {{host}}/api/reservations?sort=name
+Authorization: Bearer {{adminToken}}
 
-###
-
+### ADMIN from pozniej niz to
 GET {{host}}/api/reservations?from=2026-11-10T12:00:00Z&to=2026-11-10T10:00:00Z
+Authorization: Bearer {{adminToken}}
 
-###
+### USER wlasciciel rezerwacja 2
+GET {{host}}/api/reservations/2
+Authorization: Bearer {{userToken}}
 
+### USER obcy rezerwacja 2 (404)
+GET {{host}}/api/reservations/2
+Authorization: Bearer {{otherToken}}
+
+### ADMIN rezerwacja 2
+GET {{host}}/api/reservations/2
+Authorization: Bearer {{adminToken}}
+
+### USER rezerwacja nie istnieje
+GET {{host}}/api/reservations/999
+Authorization: Bearer {{userToken}}
+
+### USER nowa rezerwacja
 POST {{host}}/api/reservations
 Content-Type: application/json
+Authorization: Bearer {{userToken}}
 
 {
-  "roomId": 5,
-  "reservedBy": "Maria Wójcik",
-  "participants": 30,
-  "startTime": "2026-11-10T10:00:00Z",
-  "endTime": "2026-11-10T12:00:00Z"
+  "roomId": 2,
+  "participants": 5,
+  "startTime": "2026-12-15T10:00:00Z",
+  "endTime": "2026-12-15T11:00:00Z"
 }
 
-###
-
+### USER obcy nowa rezerwacja
 POST {{host}}/api/reservations
 Content-Type: application/json
+Authorization: Bearer {{otherToken}}
+
+{
+  "roomId": 2,
+  "participants": 5,
+  "startTime": "2026-12-16T10:00:00Z",
+  "endTime": "2026-12-16T11:00:00Z"
+}
+
+### ADMIN nowa rezerwacja
+POST {{host}}/api/reservations
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "roomId": 2,
+  "participants": 5,
+  "startTime": "2026-12-17T10:00:00Z",
+  "endTime": "2026-12-17T11:00:00Z"
+}
+
+### USER nowa rezerwacja z userId w body
+POST {{host}}/api/reservations
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "roomId": 1,
+  "userId": 1,
+  "participants": 10,
+  "startTime": "2026-12-11T10:00:00Z",
+  "endTime": "2026-12-11T11:00:00Z"
+}
+
+### USER nowa rezerwacja z reservedBy w body
+POST {{host}}/api/reservations
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
 
 {
   "roomId": 1,
   "reservedBy": "Jan Kowalski",
+  "participants": 10,
+  "startTime": "2026-12-11T10:00:00Z",
+  "endTime": "2026-12-11T11:00:00Z"
+}
+
+### USER rezerwacja stykajaca sie z istniejaca
+POST {{host}}/api/reservations
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "roomId": 1,
   "participants": 10,
   "startTime": "2026-11-10T12:00:00Z",
   "endTime": "2026-11-10T13:00:00Z"
 }
 
-###
-
+### USER rezerwacja kolizja
 POST {{host}}/api/reservations
 Content-Type: application/json
+Authorization: Bearer {{userToken}}
 
 {
   "roomId": 1,
-  "reservedBy": "Jan Kowalski",
-  "participants": 10,
-  "startTime": "2026-11-10T08:00:00Z",
-  "endTime": "2026-11-10T10:00:00Z"
-}
-
-###
-
-POST {{host}}/api/reservations
-Content-Type: application/json
-
-{
-  "roomId": 1,
-  "reservedBy": "Jan Kowalski",
   "participants": 10,
   "startTime": "2026-11-10T11:00:00Z",
   "endTime": "2026-11-10T13:00:00Z"
 }
 
-###
-
+### USER rezerwacja przekroczona pojemnosc
 POST {{host}}/api/reservations
 Content-Type: application/json
-
-{
-  "roomId": 1,
-  "reservedBy": "Jan Kowalski",
-  "participants": 10,
-  "startTime": "2026-11-10T09:00:00Z",
-  "endTime": "2026-11-10T13:00:00Z"
-}
-
-###
-
-POST {{host}}/api/reservations
-Content-Type: application/json
-
-{
-  "roomId": 1,
-  "reservedBy": "Jan Kowalski",
-  "participants": 10,
-  "startTime": "2026-11-10T10:30:00Z",
-  "endTime": "2026-11-10T11:00:00Z"
-}
-
-###
-
-POST {{host}}/api/reservations
-Content-Type: application/json
-
-{
-  "roomId": 1,
-  "reservedBy": "Jan Kowalski",
-  "participants": 10,
-  "startTime": "2026-11-10T11:30:00+01:00",
-  "endTime": "2026-11-10T12:00:00+01:00"
-}
-
-###
-
-POST {{host}}/api/reservations
-Content-Type: application/json
+Authorization: Bearer {{userToken}}
 
 {
   "roomId": 2,
-  "reservedBy": "Jan Kowalski",
-  "participants": 10,
-  "startTime": "2026-11-10T10:00:00Z",
-  "endTime": "2026-11-10T12:00:00Z"
+  "participants": 500,
+  "startTime": "2026-12-20T10:00:00Z",
+  "endTime": "2026-12-20T11:00:00Z"
 }
 
-###
-
+### ADMIN rezerwacja kolizja
 POST {{host}}/api/reservations
 Content-Type: application/json
+Authorization: Bearer {{adminToken}}
 
 {
-  "roomId": 3,
-  "reservedBy": "Anna Nowak",
-  "participants": 10,
-  "startTime": "2026-11-10T10:00:00Z",
-  "endTime": "2026-11-10T12:00:00Z"
+  "roomId": 2,
+  "participants": 5,
+  "startTime": "2026-12-15T10:30:00Z",
+  "endTime": "2026-12-15T11:30:00Z"
 }
 
-###
-
-PATCH {{host}}/api/reservations/10/cancel
-
-###
-
-PATCH {{host}}/api/reservations/10/cancel
-
-###
-
+### ADMIN rezerwacja przekroczona pojemnosc
 POST {{host}}/api/reservations
 Content-Type: application/json
+Authorization: Bearer {{adminToken}}
 
 {
-  "roomId": 3,
-  "reservedBy": "Tomasz Zieliński",
-  "participants": 10,
-  "startTime": "2026-11-10T10:00:00Z",
-  "endTime": "2026-11-10T12:00:00Z"
+  "roomId": 2,
+  "participants": 500,
+  "startTime": "2026-12-20T10:00:00Z",
+  "endTime": "2026-12-20T11:00:00Z"
 }
 
-###
+### USER obcy anuluje rezerwacje 2 (404)
+PATCH {{host}}/api/reservations/2/cancel
+Authorization: Bearer {{otherToken}}
 
+### USER wlasciciel anuluje rezerwacje 2
+PATCH {{host}}/api/reservations/2/cancel
+Authorization: Bearer {{userToken}}
+
+### ADMIN anuluje cudza rezerwacje 4
+PATCH {{host}}/api/reservations/4/cancel
+Authorization: Bearer {{adminToken}}
+
+### ADMIN anuluje rozpoczeta rezerwacje 1
 PATCH {{host}}/api/reservations/1/cancel
-
-###
-
-PATCH {{host}}/api/reservations/99/cancel
-
-###
-
-POST {{host}}/api/reservations
-Content-Type: application/json
-
-{
-  "roomId": 4,
-  "reservedBy": "Jan Kowalski",
-  "participants": 40,
-  "startTime": "2026-11-10T10:00:00Z",
-  "endTime": "2026-11-10T12:00:00Z"
-}
-
-###
-
-POST {{host}}/api/reservations
-Content-Type: application/json
-
-{
-  "roomId": 4,
-  "reservedBy": "Jan Kowalski",
-  "participants": 10,
-  "startTime": "2026-11-10T12:00:00Z",
-  "endTime": "2026-11-10T10:00:00Z"
-}
-
-###
-
-POST {{host}}/api/reservations
-Content-Type: application/json
-
-{
-  "roomId": 4,
-  "reservedBy": "Jan Kowalski",
-  "participants": 10,
-  "startTime": "2026-11-10T10:00:00Z",
-  "endTime": "2026-11-10T10:10:00Z"
-}
-
-###
-
-POST {{host}}/api/reservations
-Content-Type: application/json
-
-{
-  "roomId": 4,
-  "reservedBy": "Jan Kowalski",
-  "participants": 10,
-  "startTime": "2026-11-10T08:00:00Z",
-  "endTime": "2026-11-10T17:00:00Z"
-}
-
-###
-
-POST {{host}}/api/reservations
-Content-Type: application/json
-
-{
-  "roomId": 4,
-  "reservedBy": "Jan Kowalski",
-  "participants": 10,
-  "startTime": "2026-10-01T10:00:00Z",
-  "endTime": "2026-10-01T11:00:00Z"
-}
-
-###
-
-POST {{host}}/api/reservations
-Content-Type: application/json
-
-{
-  "roomId": 99,
-  "reservedBy": "Jan Kowalski",
-  "participants": 10,
-  "startTime": "2026-11-10T10:00:00Z",
-  "endTime": "2026-11-10T12:00:00Z"
-}
-
-###
-
-POST {{host}}/api/reservations
-Content-Type: application/json
-
-{
-  "roomId": 1,
-  "reservedBy": "Al",
-  "participants": -5,
-  "startTime": "2026-11-10T10:00:00Z",
-  "endTime": "jutro",
-  "status": "CANCELLED"
-}
-
-###
-
-GET {{host}}/api/nope
-
-###
-
-GET {{host}}/api/debug/crash
+Authorization: Bearer {{adminToken}}

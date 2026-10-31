@@ -38,10 +38,6 @@ function createApp({ usersRepository, buildingsRepository, roomsRepository, rese
   app.use("/api/rooms", createRoomsRouter(createRoomsController(roomsService)));
   app.use("/api/reservations", createReservationsRouter(createReservationsController(reservationsService)));
 
-  app.get("/api/debug/crash", () => {
-    throw new Error("boom");
-  });
-
   app.use(notFound);
   app.use(errorHandler);
 
