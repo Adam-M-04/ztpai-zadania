@@ -6,7 +6,7 @@ exports.seed = async function (knex) {
     throw new Error("SEED_ADMIN_PASSWORD and SEED_USER_PASSWORD must be set in .env");
   }
 
-  await knex.raw("TRUNCATE reservations, rooms, buildings, users RESTART IDENTITY CASCADE");
+  await knex.raw("TRUNCATE audit_log, reservations, rooms, buildings, users RESTART IDENTITY CASCADE");
 
   const adminHash = await bcrypt.hash(config.seed.adminPassword, 12);
   const userHash = await bcrypt.hash(config.seed.userPassword, 12);

@@ -15,7 +15,7 @@ async function migrate() {
 }
 
 async function resetDb() {
-  await db.raw("TRUNCATE reservations, rooms, buildings, users RESTART IDENTITY CASCADE");
+  await db.raw("TRUNCATE audit_log, reservations, rooms, buildings, users RESTART IDENTITY CASCADE");
 }
 
 async function closeDb() {
