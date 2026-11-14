@@ -1,5 +1,7 @@
 # Room Booking API
 
+[![CI](https://github.com/Adam-M-04/ztpai-zadania/actions/workflows/ci.yml/badge.svg)](https://github.com/Adam-M-04/ztpai-zadania/actions/workflows/ci.yml)
+
 REST API do rezerwacji sal w budynkach. Użytkownicy rezerwują sale na wybrany przedział czasu, a system pilnuje, żeby rezerwacje w jednej sali się nie nakładały, nie przekraczały pojemności sali i trwały od 15 minut do 8 godzin.
 
 ## Technologie
@@ -75,6 +77,8 @@ npm run test:integration  # wymaga działającego PostgreSQL
 
 - Unit testy sprawdzają logikę service'u rezerwacji na repozytoriach in-memory ze wstrzykniętym czasem. Nie potrzebują bazy danych.
 - Testy integracyjne używają osobnej bazy z `TEST_DATABASE_URL` (nazwa musi kończyć się na `_test`). Baza jest tworzona automatycznie, schemat powstaje z migracji, a dane są czyszczone przed każdym testem.
+
+Przy każdym pushu do `main` i każdym pull requeście GitHub Actions uruchamia `npm test` na PostgreSQL w kontenerze i sprawdza, czy obraz Docker się buduje (`.github/workflows/ci.yml`).
 
 ## Zmienne środowiskowe
 
