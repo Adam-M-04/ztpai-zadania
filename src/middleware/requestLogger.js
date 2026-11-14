@@ -1,8 +1,13 @@
 const { randomUUID } = require("node:crypto");
+const config = require("../config");
 
 function requestLogger(req, res, next) {
   req.id = req.get("X-Request-Id") || randomUUID();
   res.set("X-Request-Id", req.id);
+
+  if (config.env === "test") {
+    return next();
+  }
 
   const start = Date.now();
 
