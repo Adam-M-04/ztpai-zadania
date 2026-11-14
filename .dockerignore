@@ -1,0 +1,14 @@
+node_modules
+.env
+.git
+.github
+.idea
+.DS_Store
+tests
+screenshoots
+scripts
+*.pdf
+*.http
+http-client.private.env.json
+Dockerfile
+docker-compose.yml
