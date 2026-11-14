@@ -8,7 +8,10 @@
     "dev": "node --watch src/server.js",
     "migrate:latest": "knex migrate:latest",
     "migrate:rollback": "knex migrate:rollback",
-    "seed:run": "knex seed:run"
+    "seed:run": "knex seed:run",
+    "test": "jest --runInBand",
+    "test:unit": "jest --selectProjects unit",
+    "test:integration": "jest --selectProjects integration --runInBand"
   },
   "keywords": [],
   "author": "",
@@ -23,5 +26,9 @@
     "pg": "^8.23.1",
     "swagger-ui-express": "^5.0.1",
     "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "jest": "^30.5.2",
+    "supertest": "^7.3.2"
   }
 }
