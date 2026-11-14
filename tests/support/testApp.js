@@ -3,10 +3,12 @@ const request = require("supertest");
 const db = require("../../src/db");
 const { createApp } = require("../../src/app");
 const { createRepositories } = require("../../src/repositories");
+const { createEventBus } = require("../../src/events/eventBus");
 
 const PASSWORD = "test-password-123";
 
-const app = createApp(createRepositories(db));
+const eventBus = createEventBus();
+const app = createApp({ ...createRepositories(db), eventBus });
 
 async function migrate() {
   await db.migrate.latest();

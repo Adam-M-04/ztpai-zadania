@@ -39,14 +39,16 @@ function setup(reservations = []) {
   const clock = { current: NOW };
   const roomsRepository = createMemoryRoomsRepository(rooms);
   const reservationsRepository = createMemoryReservationsRepository(reservations);
+  const eventBus = { publish: jest.fn() };
 
   const service = createReservationsService({
     reservationsRepository,
     runInTransaction: createMemoryTransaction({ roomsRepository, reservationsRepository }),
+    eventBus,
     now: () => clock.current,
   });
 
-  return { service, reservationsRepository, clock };
+  return { service, reservationsRepository, eventBus, clock };
 }
 
 function input(start, end, overrides = {}) {
@@ -228,5 +230,89 @@ describe("getReservation - ownership", () => {
     const found = await service.getReservation(1, admin);
 
     expect(found.userId).toBe(owner.id);
+  });
+});
+
+describe("events", () => {
+  test("publishes reservation.created after successful create", async () => {
+    const { service, eventBus } = setup();
+
+    const created = await service.createReservation(input("10:00", "12:00"), owner);
+
+    expect(eventBus.publish).toHaveBeenCalledTimes(1);
+    expect(eventBus.publish).toHaveBeenCalledWith("reservation.created", {
+      reservationId: created.id,
+      roomId: 1,
+      userId: owner.id,
+      startTime: new Date(at("10:00")),
+      endTime: new Date(at("12:00")),
+    });
+  });
+
+  test("publishes event only after transaction is finished", async () => {
+    const roomsRepository = createMemoryRoomsRepository(rooms);
+    const reservationsRepository = createMemoryReservationsRepository();
+    const steps = [];
+    const eventBus = { publish: jest.fn(() => steps.push("publish")) };
+
+    const service = createReservationsService({
+      reservationsRepository,
+      runInTransaction: async (work) => {
+        const result = await work({ roomsRepository, reservationsRepository });
+        steps.push("commit");
+        return result;
+      },
+      eventBus,
+      now: () => NOW,
+    });
+
+    await service.createReservation(input("10:00", "12:00"), owner);
+
+    expect(steps).toEqual(["commit", "publish"]);
+  });
+
+  test.each([
+    ["ROOM_ALREADY_BOOKED", input("11:00", "13:00")],
+    ["ROOM_CAPACITY_EXCEEDED", input("13:00", "14:00", { participants: 11 })],
+    ["VALIDATION_ERROR", input("13:00", "13:10")],
+  ])("does not publish event when create fails with %s", async (code, data) => {
+    const { service, eventBus } = setup([reservation()]);
+
+    await expect(service.createReservation(data, otherUser)).rejects.toMatchObject({ code });
+
+    expect(eventBus.publish).not.toHaveBeenCalled();
+  });
+
+  test("publishes reservation.cancelled with cancelledBy", async () => {
+    const { service, eventBus } = setup([reservation()]);
+
+    await service.cancelReservation(1, admin);
+
+    expect(eventBus.publish).toHaveBeenCalledTimes(1);
+    expect(eventBus.publish).toHaveBeenCalledWith("reservation.cancelled", {
+      reservationId: 1,
+      roomId: 1,
+      userId: owner.id,
+      cancelledBy: admin.id,
+    });
+  });
+
+  test("does not publish event for second cancel", async () => {
+    const { service, eventBus } = setup([reservation()]);
+
+    await service.cancelReservation(1, owner);
+    await service.cancelReservation(1, owner);
+
+    expect(eventBus.publish).toHaveBeenCalledTimes(1);
+  });
+
+  test("does not publish event when cancel fails", async () => {
+    const { service, eventBus, clock } = setup([reservation()]);
+    clock.current = new Date(at("11:00"));
+
+    await expect(service.cancelReservation(1, owner)).rejects.toMatchObject({ code: "RESERVATION_ALREADY_STARTED" });
+    await expect(service.cancelReservation(1, otherUser)).rejects.toMatchObject({ code: "NOT_FOUND" });
+
+    expect(eventBus.publish).not.toHaveBeenCalled();
   });
 });

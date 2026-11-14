@@ -102,6 +102,11 @@ function createReservationsRepository(db) {
 
     findById,
 
+    async findByIdForUpdate(id) {
+      const row = await selectReservations(db).where("res.id", id).forUpdate("res").first();
+      return row ? toReservation(row) : null;
+    },
+
     async findByRoomAndStatus(roomId, status) {
       const rows = await selectReservations(db).where({ "res.room_id": roomId, "res.status": status });
       return rows.map(toReservation);

@@ -31,6 +31,7 @@ function createMemoryReservationsRepository(reservations = []) {
     },
 
     findById,
+    findByIdForUpdate: findById,
 
     async findByRoomAndStatus(roomId, status) {
       return items.filter((r) => r.roomId === roomId && r.status === status).map(copy);

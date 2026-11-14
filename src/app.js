@@ -18,7 +18,15 @@ const { createReservationsService } = require("./modules/reservations/reservatio
 const { createReservationsController } = require("./modules/reservations/reservations.controller");
 const { createReservationsRouter } = require("./modules/reservations/reservations.routes");
 
-function createApp({ usersRepository, buildingsRepository, roomsRepository, reservationsRepository, runInTransaction, now }) {
+function createApp({
+  usersRepository,
+  buildingsRepository,
+  roomsRepository,
+  reservationsRepository,
+  runInTransaction,
+  eventBus,
+  now,
+}) {
   const app = express();
 
   app.use(requestLogger);
@@ -27,7 +35,7 @@ function createApp({ usersRepository, buildingsRepository, roomsRepository, rese
   const authService = createAuthService({ usersRepository });
   const buildingsService = createBuildingsService({ buildingsRepository, roomsRepository });
   const roomsService = createRoomsService({ roomsRepository, buildingsRepository });
-  const reservationsService = createReservationsService({ reservationsRepository, runInTransaction, now });
+  const reservationsService = createReservationsService({ reservationsRepository, runInTransaction, eventBus, now });
 
   app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openapi, { swaggerOptions: { persistAuthorization: true } }));
   app.use("/api/auth", createAuthRouter(createAuthController(authService)));
