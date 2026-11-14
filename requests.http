@@ -531,3 +531,23 @@ Authorization: Bearer {{adminToken}}
 ### ADMIN anuluje rozpoczeta rezerwacje 1
 PATCH {{host}}/api/reservations/1/cancel
 Authorization: Bearer {{adminToken}}
+
+### ADMIN audit log
+GET {{host}}/api/admin/audit-log
+Authorization: Bearer {{adminToken}}
+
+### ADMIN audit log tylko anulowania
+GET {{host}}/api/admin/audit-log?eventType=reservation.cancelled
+Authorization: Bearer {{adminToken}}
+
+### ADMIN audit log paginacja
+GET {{host}}/api/admin/audit-log?limit=1&page=2
+Authorization: Bearer {{adminToken}}
+
+### ADMIN audit log zly eventType (400)
+GET {{host}}/api/admin/audit-log?eventType=room.created
+Authorization: Bearer {{adminToken}}
+
+### USER audit log (403)
+GET {{host}}/api/admin/audit-log
+Authorization: Bearer {{userToken}}

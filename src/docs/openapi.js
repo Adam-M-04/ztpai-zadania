@@ -27,7 +27,7 @@ module.exports = {
   openapi: "3.0.3",
   info: {
     title: "Room Booking API",
-    version: "4.0.0",
+    version: "5.0.0",
     description: "API do rezerwacji sal. Endpointy poza rejestracją i logowaniem wymagają tokenu JWT (przycisk Authorize).",
   },
   servers: [{ url: "/" }],
@@ -36,6 +36,7 @@ module.exports = {
     { name: "buildings" },
     { name: "rooms" },
     { name: "reservations" },
+    { name: "admin" },
   ],
   security: [{ bearerAuth: [] }],
   paths: {
@@ -248,6 +249,23 @@ module.exports = {
         },
       },
     },
+    "/api/admin/audit-log": {
+      get: {
+        tags: ["admin"],
+        summary: "Audit log eventów rezerwacji, od najnowszych (tylko ADMIN)",
+        parameters: [
+          { name: "eventType", in: "query", schema: { type: "string", enum: ["reservation.created", "reservation.cancelled"] } },
+          { name: "page", in: "query", schema: { type: "integer", minimum: 1, default: 1 } },
+          { name: "limit", in: "query", schema: { type: "integer", minimum: 1, maximum: 100, default: 20 } },
+        ],
+        responses: {
+          200: json({ $ref: "#/components/schemas/AuditLogList" }),
+          400: { $ref: "#/components/responses/BadRequest" },
+          401: { $ref: "#/components/responses/Unauthorized" },
+          403: { $ref: "#/components/responses/Forbidden" },
+        },
+      },
+    },
   },
   components: {
     securitySchemes: {
@@ -436,6 +454,33 @@ module.exports = {
               page: { type: "integer", example: 1 },
               limit: { type: "integer", example: 20 },
               total: { type: "integer", example: 5 },
+              totalPages: { type: "integer", example: 1 },
+            },
+          },
+        },
+      },
+      AuditLogEntry: {
+        type: "object",
+        properties: {
+          id: { type: "integer", example: 2 },
+          eventType: { type: "string", enum: ["reservation.created", "reservation.cancelled"], example: "reservation.cancelled" },
+          payload: {
+            type: "object",
+            example: { reservationId: 6, roomId: 2, userId: 3, cancelledBy: 1 },
+          },
+          createdAt: { type: "string", format: "date-time" },
+        },
+      },
+      AuditLogList: {
+        type: "object",
+        properties: {
+          data: { type: "array", items: { $ref: "#/components/schemas/AuditLogEntry" } },
+          meta: {
+            type: "object",
+            properties: {
+              page: { type: "integer", example: 1 },
+              limit: { type: "integer", example: 20 },
+              total: { type: "integer", example: 2 },
               totalPages: { type: "integer", example: 1 },
             },
           },

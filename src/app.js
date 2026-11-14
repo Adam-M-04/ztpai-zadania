@@ -17,12 +17,16 @@ const { createRoomsRouter } = require("./modules/rooms/rooms.routes");
 const { createReservationsService } = require("./modules/reservations/reservations.service");
 const { createReservationsController } = require("./modules/reservations/reservations.controller");
 const { createReservationsRouter } = require("./modules/reservations/reservations.routes");
+const { createAuditLogService } = require("./modules/audit-log/audit-log.service");
+const { createAuditLogController } = require("./modules/audit-log/audit-log.controller");
+const { createAuditLogRouter } = require("./modules/audit-log/audit-log.routes");
 
 function createApp({
   usersRepository,
   buildingsRepository,
   roomsRepository,
   reservationsRepository,
+  auditLogRepository,
   runInTransaction,
   eventBus,
   now,
@@ -36,6 +40,7 @@ function createApp({
   const buildingsService = createBuildingsService({ buildingsRepository, roomsRepository });
   const roomsService = createRoomsService({ roomsRepository, buildingsRepository });
   const reservationsService = createReservationsService({ reservationsRepository, runInTransaction, eventBus, now });
+  const auditLogService = createAuditLogService({ auditLogRepository });
 
   app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(openapi, { swaggerOptions: { persistAuthorization: true } }));
   app.use("/api/auth", createAuthRouter(createAuthController(authService)));
@@ -45,6 +50,7 @@ function createApp({
   app.use("/api/buildings", createBuildingsRouter(createBuildingsController(buildingsService)));
   app.use("/api/rooms", createRoomsRouter(createRoomsController(roomsService)));
   app.use("/api/reservations", createReservationsRouter(createReservationsController(reservationsService)));
+  app.use("/api/admin/audit-log", createAuditLogRouter(createAuditLogController(auditLogService)));
 
   app.use(notFound);
   app.use(errorHandler);

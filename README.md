@@ -111,8 +111,11 @@ Wszystkie endpointy poza `/api/auth/register`, `/api/auth/login` i `/api/docs` w
 | GET | `/api/reservations/:id` | właściciel lub ADMIN |
 | POST | `/api/reservations` | zalogowany |
 | PATCH | `/api/reservations/:id/cancel` | właściciel lub ADMIN |
+| GET | `/api/admin/audit-log` | ADMIN |
 
 `GET /api/reservations` obsługuje paginację (`page`, `limit`), filtry (`roomId`, `buildingId`, `userId` tylko dla ADMIN, `status`, `from`, `to`) i sortowanie (`sort=startTime`, `-startTime`, `createdAt`, `participants`).
+
+`GET /api/admin/audit-log` zwraca zapisane eventy rezerwacji (`reservation.created`, `reservation.cancelled`) od najnowszych, z paginacją (`page`, `limit`) i filtrem `eventType`.
 
 Szczegóły z przykładami requestów i odpowiedzi są w Swagger UI.
 
@@ -122,7 +125,8 @@ Szczegóły z przykładami requestów i odpowiedzi są w Swagger UI.
 db/migrations      migracje Knex
 db/seeds           dane przykładowe
 src/config         wczytanie i walidacja zmiennych środowiskowych
-src/modules        moduły: auth, buildings, rooms, reservations, users
+src/modules        moduły: auth, buildings, rooms, reservations, users, audit-log, notifications
+src/events         event bus i rejestracja listenerów
 src/middleware     uwierzytelnianie, autoryzacja, walidacja, obsługa błędów
 src/docs           specyfikacja OpenAPI
 tests/unit         unit testy
